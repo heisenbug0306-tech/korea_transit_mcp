@@ -178,32 +178,46 @@ async function getBusArrival(arsId: string): Promise<string> {
 
 async function searchBusStation(stationName: string): Promise<string> {
   try {
-    // 서울 열린데이터광장 버스정류소 위치정보 API 사용
-    const url = `http://openapi.seoul.go.kr:8088/${SEOUL_API_KEY}/json/busStopLocationXyInfo/1/1000/`;
-    const response = await axios.get(url, { timeout: 15000 });
+    // 서울 열린데이터광장 버스정류소 위치정보 API 사용 (최대 1000개씩, 여러 페이지 조회)
+    const results: any[] = [];
+    const pageSize = 1000;
+    const totalPages = 12; // 약 12000개 커버
 
-    const allStations = response.data?.busStopLocationXyInfo?.row || [];
+    for (let page = 1; page <= totalPages; page++) {
+      const startIdx = (page - 1) * pageSize + 1;
+      const endIdx = page * pageSize;
+      const url = `http://openapi.seoul.go.kr:8088/${SEOUL_API_KEY}/json/busStopLocationXyInfo/${startIdx}/${endIdx}/`;
 
-    if (allStations.length === 0) {
-      throw new Error("API 응답 없음");
+      try {
+        const response = await axios.get(url, { timeout: 10000 });
+        const rows = response.data?.busStopLocationXyInfo?.row || [];
+
+        // 검색어가 포함된 정류장만 필터링하여 추가
+        const matched = rows.filter((s: any) => s.STOPS_NM?.includes(stationName));
+        results.push(...matched);
+
+        // 충분한 결과를 찾으면 조기 종료
+        if (results.length >= 20) break;
+
+        // API에서 더 이상 데이터가 없으면 종료
+        if (rows.length < pageSize) break;
+      } catch {
+        // 개별 페이지 실패는 무시하고 계속
+        continue;
+      }
     }
 
-    // 정류장 이름으로 필터링
-    const filtered = allStations.filter((station: any) =>
-      station.STOPS_NM?.includes(stationName)
-    );
-
-    if (filtered.length === 0) {
+    if (results.length === 0) {
       return `🔍 '${stationName}' 검색 결과\n\n해당 이름을 포함하는 버스 정류장을 찾을 수 없습니다.\n다른 키워드로 검색해 주세요.`;
     }
 
-    const formattedStations = filtered.slice(0, 10).map((station: any) => ({
+    const formattedStations = results.slice(0, 10).map((station: any) => ({
       정류장명: station.STOPS_NM,
       정류장번호: station.STOPS_NO,
       정류장타입: station.STOPS_TYPE || "일반",
     }));
 
-    return `🔍 '${stationName}' 버스정류장 검색 결과 (${filtered.length}건 중 상위 10건)\n\n${JSON.stringify(formattedStations, null, 2)}`;
+    return `🔍 '${stationName}' 버스정류장 검색 결과 (${results.length}건 중 상위 10건)\n\n${JSON.stringify(formattedStations, null, 2)}`;
   } catch (error: any) {
     return `🔍 '${stationName}' 검색 실패\n\n⚠️ 오류: ${error.message}\n잠시 후 다시 시도해 주세요.`;
   }
