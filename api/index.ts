@@ -301,14 +301,15 @@ async function getTransitInfo(location: string): Promise<string> {
 
   result += `\n`;
 
-  // 2. 따릉이 정보 - "역"을 포함한 검색어로도 시도
+  // 2. 따릉이 정보 - 정확한 지역명 매칭
   try {
     const bikeUrl = `http://openapi.seoul.go.kr:8088/${SEOUL_API_KEY}/json/bikeList/1/1000/`;
     const bikeRes = await axios.get(bikeUrl, { timeout: 10000 });
     const stations = bikeRes.data?.rentBikeStatus?.row || [];
-    // "역" 포함/미포함 모두 검색
+    // 정확한 매칭: "서초"가 단어 시작 부분에 있거나, 숫자/공백/마침표 뒤에 있어야 함
+    const searchPattern = new RegExp(`(^|[0-9.\\s])${stationName}`, 'i');
     const filtered = stations.filter((s: any) =>
-      s.stationName?.includes(stationName) || s.stationName?.includes(location)
+      searchPattern.test(s.stationName) || s.stationName?.includes(location)
     );
 
     if (filtered.length > 0) {
