@@ -306,11 +306,9 @@ async function getTransitInfo(location: string): Promise<string> {
     const bikeUrl = `http://openapi.seoul.go.kr:8088/${SEOUL_API_KEY}/json/bikeList/1/1000/`;
     const bikeRes = await axios.get(bikeUrl, { timeout: 10000 });
     const stations = bikeRes.data?.rentBikeStatus?.row || [];
-    // 정확한 매칭: "서초"가 단어 시작 부분에 있거나, 숫자/공백/마침표 뒤에 있어야 함
-    const searchPattern = new RegExp(`(^|[0-9.\\s])${stationName}`, 'i');
-    const filtered = stations.filter((s: any) =>
-      searchPattern.test(s.stationName) || s.stationName?.includes(location)
-    );
+    // 정확한 매칭: 검색어가 숫자/공백/마침표 뒤에 있어야 함 (예: "사당" but not "국회의사당")
+    const searchPattern = new RegExp(`(^|[0-9.\\s])${stationName}(역|\\s|$)`, 'i');
+    const filtered = stations.filter((s: any) => searchPattern.test(s.stationName));
 
     if (filtered.length > 0) {
       result += `🚲 따릉이 대여소:\n`;
