@@ -130,8 +130,8 @@ async function getSubwayArrival(stationName: string): Promise<string> {
 
 async function getBusArrival(arsId: string): Promise<string> {
   try {
-    // 공공데이터포털 서울시 버스도착정보 API (승인됨) - HTTPS 필수
-    const url = `https://ws.bus.go.kr/api/rest/stationinfo/getStationByUid?serviceKey=${DATA_GO_KR_API_KEY}&arsId=${arsId}&resultType=json`;
+    // 공공데이터포털 서울시 버스도착정보 API (승인됨)
+    const url = `http://ws.bus.go.kr/api/rest/stationinfo/getStationByUid?serviceKey=${DATA_GO_KR_API_KEY}&arsId=${arsId}&resultType=json`;
     const response = await axios.get(url, { timeout: 10000 });
 
     // API 응답 구조 검증
