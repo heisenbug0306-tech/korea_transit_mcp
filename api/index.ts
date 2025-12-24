@@ -89,9 +89,12 @@ const TOOLS = [
 
 // 도구 실행 함수들
 async function getSubwayArrival(stationName: string): Promise<string> {
+  // "역" 접미사 제거 (강남역 → 강남)
+  const searchName = stationName.endsWith('역') ? stationName.slice(0, -1) : stationName;
+
   try {
     // URL 인코딩 없이 한글 직접 사용
-    const url = `http://swopenapi.seoul.go.kr/api/subway/${SEOUL_API_KEY}/json/realtimeStationArrival/0/10/${stationName}`;
+    const url = `http://swopenapi.seoul.go.kr/api/subway/${SEOUL_API_KEY}/json/realtimeStationArrival/0/10/${searchName}`;
     const response = await axios.get(url, { timeout: 15000 });
 
     // API 응답 검증 (null 체크 포함)
@@ -120,11 +123,11 @@ async function getSubwayArrival(stationName: string): Promise<string> {
       현재위치: arr.arvlMsg3,
     }));
 
-    return `🚇 ${stationName}역 실시간 도착정보\n\n${JSON.stringify(formattedArrivals, null, 2)}`;
+    return `🚇 ${searchName}역 실시간 도착정보\n\n${JSON.stringify(formattedArrivals, null, 2)}`;
   } catch (error: any) {
     // 샘플 데이터 없이 에러 메시지만 반환
     const errorDetail = error.code || error.message || String(error);
-    return `🚇 '${stationName}' 역 도착정보 조회 실패\n\n⚠️ 오류: ${errorDetail}\n\n잠시 후 다시 시도해 주세요.`;
+    return `🚇 '${searchName}' 역 도착정보 조회 실패\n\n⚠️ 오류: ${errorDetail}\n\n잠시 후 다시 시도해 주세요.`;
   }
 }
 
@@ -176,8 +179,10 @@ async function searchBusStation(stationName: string): Promise<string> {
         const response = await axios.get(url, { timeout: 10000 });
         const rows = response.data?.busStopLocationXyInfo?.row || [];
 
-        // 검색어가 포함된 정류장만 필터링하여 추가
-        const matched = rows.filter((s: any) => s.STOPS_NM?.includes(stationName));
+        // 검색어가 포함된 정류장만 필터링 (이름 또는 번호로 검색)
+        const matched = rows.filter((s: any) =>
+          s.STOPS_NM?.includes(stationName) || s.STOPS_NO === stationName
+        );
         results.push(...matched);
 
         // 충분한 결과를 찾으면 조기 종료
@@ -192,7 +197,7 @@ async function searchBusStation(stationName: string): Promise<string> {
     }
 
     if (results.length === 0) {
-      return `🔍 '${stationName}' 검색 결과\n\n해당 이름을 포함하는 버스 정류장을 찾을 수 없습니다.\n다른 키워드로 검색해 주세요.`;
+      return `🔍 '${stationName}' 검색 결과\n\n해당 이름 또는 번호의 버스 정류장을 찾을 수 없습니다.\n정류장 이름이나 5자리 정류장 번호로 검색해 주세요.`;
     }
 
     const formattedStations = results.slice(0, 10).map((station: any) => ({
