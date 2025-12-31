@@ -307,7 +307,7 @@ async function transitGetBusArrival(args: {
   const format = args.response_format || "markdown";
 
   try {
-    const url = `http://ws.bus.go.kr/api/rest/stationinfo/getStationByUid?serviceKey=${DATA_GO_KR_API_KEY}&arsId=${arsId}&resultType=json`;
+    const url = `http://ws.bus.go.kr/api/rest/stationinfo/getStationByUidItem?serviceKey=${DATA_GO_KR_API_KEY}&arsId=${arsId}&resultType=json`;
     const response = await fetchWithTimeout(url);
     const data = await response.json();
 
