@@ -36,6 +36,7 @@ interface BikeStation {
   parkingBikeTotCnt: number;
   rackTotCnt: number;
 }
+interface BusArrival {  stNm: string;  arsId: string;  rtNm: string;  busRouteAbrv?: string;  arrmsg1: string;  arrmsg2: string;  routeType?: string;  stationTp?: string;}
 
 interface ToolArguments {
   station_name?: string;
@@ -350,27 +351,56 @@ async function transitGetBusArrival(args: {
   response_format?: string;
 }): Promise<string> {
   const arsId = args.ars_id;
+  const limit = Math.min(args.limit || 10, 20);
   const format = args.response_format || "markdown";
 
-  // 버스도착정보 API는 별도 인증이 필요하여 현재 서비스 준비중
-  if (format === "json") {
-    return JSON.stringify({
-      status: "service_preparing",
-      arsId,
-      message: "버스 실시간 도착정보 서비스는 현재 준비중입니다.",
-      alternatives: [
-        "transit_search_bus_station으로 정류장 검색",
-        "transit_get_combined_info로 주변 교통정보 조회"
-      ]
-    }, null, 2);
-  }
+  try {
+    // 공공데이터포털 버스 도착정보 API 호출
+    const url = `http://ws.bus.go.kr/api/rest/stationinfo/getStationByUid?serviceKey=${DATA_GO_KR_API_KEY}&resultType=json&arsId=${arsId}`;
+    const response = await fetchWithTimeout(url);
+    const data = await response.json();
 
-  return `## 🚌 버스 도착정보 (정류장: ${arsId})\n\n` +
-    `⚠️ **서비스 준비중**\n\n` +
-    `버스 실시간 도착정보 API 연동을 준비하고 있습니다.\n\n` +
-    `### 대안 기능\n` +
-    `- \`transit_search_bus_station\`: 버스 정류장 검색\n` +
-    `- \`transit_get_combined_info\`: 주변 통합 교통정보 조회\n`;
+    // API 응답 확인
+    if (data.msgHeader?.headerCd !== "0") {
+      throw new Error(data.msgHeader?.headerMsg || "API 오류");
+    }
+
+    const arrivals: BusArrival[] = data.msgBody?.itemList || [];
+
+    if (format === "json") {
+      return JSON.stringify({
+        stationName: arrivals[0]?.stNm || "알 수 없음",
+        arsId,
+        count: arrivals.length,
+        arrivals: arrivals.slice(0, limit).map((bus: BusArrival) => ({
+          routeName: bus.rtNm,
+          routeAbbr: bus.busRouteAbrv,
+          arrival1: bus.arrmsg1,
+          arrival2: bus.arrmsg2,
+          routeType: getBusTypeName(bus.routeType || "1"),
+        })),
+      }, null, 2);
+    }
+
+    if (arrivals.length === 0) {
+      return `## 🚌 버스 도착정보 (정류장: ${arsId})\n\n현재 도착 예정 버스가 없습니다.`;
+    }
+
+    const stationName = arrivals[0]?.stNm || "알 수 없음";
+    let md = `## 🚌 ${stationName} 버스 도착정보\n\n`;
+    md += `> 정류장 번호: ${arsId} | ${arrivals.length}개 노선\n\n`;
+
+    arrivals.slice(0, limit).forEach((bus: BusArrival, idx: number) => {
+      const routeType = getBusTypeName(bus.routeType || "1");
+      md += `### ${idx + 1}. ${bus.rtNm} (${routeType})\n`;
+      md += `- **첫번째 버스**: ${bus.arrmsg1}\n`;
+      md += `- **두번째 버스**: ${bus.arrmsg2}\n\n`;
+    });
+
+    return truncateResponse(md);
+  } catch (error) {
+    return `❌ 버스 도착정보 조회 실패: ${getErrorMessage(error)}\n\n💡 정류장 번호가 올바른지 확인해 주세요.`;
+  }
 }
 
 async function transitSearchBusStation(args: {

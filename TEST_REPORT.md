@@ -191,3 +191,86 @@
 
 *보고서 생성: 2025-12-24*
 *Korea Transit MCP v1.0.0*
+
+---
+
+## API 직접 테스트 (2026-01-11)
+
+### 테스트 개요
+
+| 항목 | 내용 |
+|------|------|
+| 테스트 일시 | 2026년 1월 11일 22:26 |
+| 테스트 방법 | curl을 통한 직접 API 호출 |
+| 테스트 대상 | 4개 외부 API 엔드포인트 |
+
+### API 테스트 결과
+
+| API | 엔드포인트 | 상태 | 응답 코드 |
+|-----|-----------|------|----------|
+| 지하철 도착정보 | swopenapi.seoul.go.kr/api/subway | ✅ 정상 | INFO-000 |
+| 따릉이 대여소 | openapi.seoul.go.kr:8088/.../bikeList | ✅ 정상 | INFO-000 |
+| 버스 정류장 검색 | openapi.seoul.go.kr:8088/.../busStopLocationXyInfo | ✅ 정상 | INFO-000 |
+| 버스 도착정보 | ws.bus.go.kr/api/rest/stationinfo | ✅ 정상 | headerCd: 0 |
+
+### 상세 테스트 결과
+
+#### 1. 지하철 도착정보 API (서울 열린데이터광장)
+
+\`\`\`
+URL: http://swopenapi.seoul.go.kr/api/subway/{API_KEY}/json/realtimeStationArrival/0/5/강남
+응답: 정상 처리 (status: 200, code: INFO-000)
+데이터: 7건의 실시간 도착정보
+- 신분당선 신사행: 전역 도착
+- 2호선 성수행: 4분 20초 후 (방배 출발)
+\`\`\`
+
+#### 2. 따릉이 대여소 API (서울 열린데이터광장)
+
+\`\`\`
+URL: http://openapi.seoul.go.kr:8088/{API_KEY}/json/bikeList/1/5/
+응답: 정상 처리 (CODE: INFO-000)
+데이터: 대여소 정보 정상 반환
+- 102. 망원역 1번출구 앞: 15/15대 (100%)
+- 103. 망원역 2번출구 앞: 7/14대 (50%)
+- 104. 합정역 1번출구 앞: 18/13대 (138%)
+\`\`\`
+
+#### 3. 버스 정류장 검색 API (서울 열린데이터광장)
+
+\`\`\`
+URL: http://openapi.seoul.go.kr:8088/{API_KEY}/json/busStopLocationXyInfo/1/5/
+응답: 정상 처리 (CODE: INFO-000)
+데이터: 총 11,237개 정류장 정보 조회 가능
+- 중계역 (11833, 11834)
+- 하계역 (11835, 11836)
+\`\`\`
+
+#### 4. 버스 도착정보 API (공공데이터포털)
+
+\`\`\`
+URL: http://ws.bus.go.kr/api/rest/stationinfo/getStationByUid?serviceKey={API_KEY}&resultType=json&arsId=11833
+응답: 정상 처리 (headerCd: 0, headerMsg: 정상적으로 처리되었습니다)
+데이터: 버스 도착정보 정상 반환
+- 6100번 버스: 곧 도착 (중계역)
+- 다음 버스: 20분 후 (4번째 전)
+\`\`\`
+
+### API 키 상태
+
+| 키 | 출처 | 상태 |
+|----|------|------|
+| SEOUL_API_KEY | 서울 열린데이터광장 | ✅ 유효 |
+| DATA_GO_KR_API_KEY | 공공데이터포털 | ✅ 유효 |
+
+### 결론
+
+**모든 외부 API가 정상 작동 중입니다.**
+
+- 서울 열린데이터광장 API (3개): 정상
+- 공공데이터포털 API (1개): 정상
+- API 키: 모두 유효
+
+---
+
+*API 테스트 업데이트: 2026-01-11*
