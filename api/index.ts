@@ -697,6 +697,36 @@ function jsonRpcError(id: string | number | null, code: number, message: string)
   return { jsonrpc: "2.0", id, error: { code, message } };
 }
 
+// ===== 랜딩페이지 HTML =====
+
+const LANDING_PAGE_HTML = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="서울 대중교통 실시간 정보를 AI와 대화하며 조회하는 MCP 서버">
+  <meta property="og:title" content="Korea Transit MCP - 서울 대중교통 AI 조회">
+  <meta property="og:description" content="강남역 지하철 언제 와? 라고 물으면 바로 답해드립니다.">
+  <title>Korea Transit MCP - 서울 대중교통 AI 조회</title>
+  <style>:root{--primary:#2563eb;--primary-dark:#1d4ed8;--secondary:#f97316;--bg:#f8fafc;--card:#fff;--text:#1e293b;--text-muted:#64748b;--border:#e2e8f0}*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);line-height:1.6}.container{max-width:1200px;margin:0 auto;padding:0 20px}header{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;padding:80px 0 100px;text-align:center}.logo{font-size:3rem;margin-bottom:10px}h1{font-size:2.5rem;font-weight:700;margin-bottom:15px}.tagline{font-size:1.3rem;opacity:.9;margin-bottom:30px}.badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.badge{display:inline-flex;align-items:center;background:rgba(255,255,255,.15);padding:8px 16px;border-radius:20px;font-size:.9rem;text-decoration:none;color:#fff;transition:background .2s}.badge:hover{background:rgba(255,255,255,.25)}.demo-section{margin-top:-50px;margin-bottom:60px}.demo-card{background:var(--card);border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.1);padding:30px;max-width:700px;margin:0 auto}.demo-card h3{color:var(--primary);margin-bottom:15px;font-size:1.1rem}.chat-bubble{background:#e8f4fd;border-radius:12px;padding:15px 20px;margin-bottom:15px;display:inline-block}.response{background:#f1f5f9;border-radius:12px;padding:20px;font-family:Consolas,monospace;font-size:.9rem;white-space:pre-line;line-height:1.8}.features{padding:60px 0}.features h2{text-align:center;font-size:2rem;margin-bottom:50px}.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:25px}.feature-card{background:var(--card);border-radius:12px;padding:25px;border:1px solid var(--border);transition:transform .2s,box-shadow .2s}.feature-card:hover{transform:translateY(-5px);box-shadow:0 10px 30px rgba(0,0,0,.08)}.feature-icon{font-size:2.5rem;margin-bottom:15px}.feature-card h3{font-size:1.1rem;margin-bottom:10px}.feature-card code{display:block;background:#f1f5f9;padding:8px 12px;border-radius:6px;font-size:.85rem;color:var(--primary);margin-bottom:10px}.feature-card p{color:var(--text-muted);font-size:.95rem}.cta{background:linear-gradient(135deg,#1e293b,#334155);color:#fff;padding:80px 0;text-align:center}.cta h2{font-size:2rem;margin-bottom:20px}.cta p{opacity:.8;margin-bottom:30px;font-size:1.1rem}.cta-buttons{display:flex;gap:15px;justify-content:center;flex-wrap:wrap}.btn{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:8px;font-size:1rem;font-weight:600;text-decoration:none;transition:transform .2s}.btn:hover{transform:translateY(-2px)}.btn-primary{background:var(--secondary);color:#fff}.btn-secondary{background:#fff;color:var(--text)}footer{background:#1e293b;color:#94a3b8;padding:40px 0;text-align:center}footer a{color:#94a3b8;text-decoration:none}footer a:hover{color:#fff}.endpoint{background:rgba(255,255,255,.1);display:inline-block;padding:10px 20px;border-radius:6px;font-family:monospace;margin:15px 0}@media(max-width:768px){header{padding:60px 0 80px}h1{font-size:1.8rem}.tagline{font-size:1.1rem}.features-grid{grid-template-columns:1fr}}</style>
+</head>
+<body>
+  <header><div class="container"><div class="logo">🚇🚌🚲</div><h1>Korea Transit MCP</h1><p class="tagline">"강남역 지하철 언제 와?" 라고 물으면 바로 답해드립니다</p><div class="badges"><a href="https://playmcp.kakao.com" class="badge" target="_blank">PlayMCP 등록</a><a href="https://github.com/yonghwan1106/kakao-mcp-server" class="badge" target="_blank">GitHub</a><span class="badge">MCP Compatible</span><span class="badge">실시간 데이터</span></div></div></header>
+  <section class="demo-section"><div class="container"><div class="demo-card"><h3>사용 예시</h3><div class="chat-bubble">강남역 지하철 언제 와?</div><div class="response">🚇 강남역 실시간 도착정보
+
+1. 2호선 - 성수행
+   도착: 3분 후
+   방향: 하행
+
+2. 신분당선 - 신사행
+   도착: 전역 도착
+   방향: 상행</div></div></div></section>
+  <section class="features"><div class="container"><h2>6개 도구로 서울 대중교통 완벽 커버</h2><div class="features-grid"><div class="feature-card"><div class="feature-icon">🚇</div><h3>지하철 실시간 도착정보</h3><code>transit_get_subway_arrival</code><p>역 이름으로 실시간 도착 시간, 방향, 현재 위치 조회</p></div><div class="feature-card"><div class="feature-icon">🔄</div><h3>호선별 운행상태</h3><code>transit_get_subway_status</code><p>지연, 사고 등 호선별 실시간 운행 상태 확인</p></div><div class="feature-card"><div class="feature-icon">🚌</div><h3>버스 도착정보</h3><code>transit_get_bus_arrival</code><p>정류장 번호로 버스 도착 예정 시간 조회</p></div><div class="feature-card"><div class="feature-icon">🔍</div><h3>버스정류장 검색</h3><code>transit_search_bus_station</code><p>정류장 이름으로 검색하여 정류장 번호 확인</p></div><div class="feature-card"><div class="feature-icon">🚲</div><h3>따릉이 대여소</h3><code>transit_get_bike_station</code><p>대여소별 자전거 잔여 대수 실시간 조회</p></div><div class="feature-card"><div class="feature-icon">📍</div><h3>통합 교통정보</h3><code>transit_get_combined_info</code><p>지하철 + 버스 + 따릉이 한 번에 조회</p></div></div></div></section>
+  <section class="cta"><div class="container"><h2>지금 바로 사용해보세요</h2><p>PlayMCP에서 도구함에 추가하거나 Claude Desktop에 연결하세요</p><div class="cta-buttons"><a href="https://playmcp.kakao.com" class="btn btn-primary" target="_blank">PlayMCP에서 추가</a><a href="https://github.com/yonghwan1106/kakao-mcp-server" class="btn btn-secondary" target="_blank">GitHub 저장소</a></div></div></section>
+  <footer><div class="container"><p><strong>Korea Transit MCP</strong> - 서울 대중교통, AI에게 물어보세요</p><div class="endpoint">MCP Endpoint: https://koreatransitmcp.vercel.app/mcp</div><p style="margin-top:20px"><a href="https://github.com/yonghwan1106/kakao-mcp-server">GitHub</a> · <a href="https://playmcp.kakao.com">PlayMCP</a> · MIT License</p></div></footer>
+</body>
+</html>`;
+
 // ===== Vercel 핸들러 =====
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -709,7 +739,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).end();
   }
 
-  // Health check
+  // 경로 확인
+  const urlPath = req.url?.split("?")[0] || "/";
+
+  // 랜딩 페이지 (루트 경로)
+  if (req.method === "GET" && (urlPath === "/" || urlPath === "")) {
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    return res.status(200).send(LANDING_PAGE_HTML);
+  }
+
+  // Health check (/health 또는 다른 GET 요청)
   if (req.method === "GET") {
     return res.status(200).json({
       status: "ok",
