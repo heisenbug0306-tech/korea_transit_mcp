@@ -430,10 +430,23 @@ async function transitSearchBusStation(args: {
       );
       results.push(...matched);
 
-      if (results.length >= limit || rows.length < pageSize) break;
+      if (results.length >= limit * 3 || rows.length < pageSize) break;
     }
 
-    const stations = results.slice(0, limit);
+    // 검색 결과 정렬: 정확한 매칭 > 시작 매칭 > 포함 매칭
+    const sortedResults = results.sort((a, b) => {
+      const aName = a.STOPS_NM || "";
+      const bName = b.STOPS_NM || "";
+      // 1순위: 검색어로 시작하는 결과 우선
+      const aStarts = aName.startsWith(query);
+      const bStarts = bName.startsWith(query);
+      if (aStarts && !bStarts) return -1;
+      if (!aStarts && bStarts) return 1;
+      // 2순위: 이름 길이 (짧은 것이 더 정확)
+      return aName.length - bName.length;
+    });
+
+    const stations = sortedResults.slice(0, limit);
 
     if (format === "json") {
       return JSON.stringify({
@@ -494,7 +507,7 @@ async function transitGetBikeStation(args: {
       );
       results.push(...matched);
 
-      if (results.length >= limit || rows.length < pageSize) break;
+      if (results.length >= limit * 3 || rows.length < pageSize) break;
     }
 
     const stations = results.slice(0, limit);
